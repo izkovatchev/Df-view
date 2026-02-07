@@ -66,6 +66,7 @@
     const origin = { x: canvas.width / 2, y: canvas.height / 2 };
     const pointRadiusPx = 10;
     const pointHitRadiusPx = 24;
+    const touchPointHitRadiusPx = 32;
 
     const points = [
       { x: -0.45, y: -0.2, color: '#6be675' },
@@ -188,17 +189,19 @@
 
     function getPointerPos(evt) {
       const rect = canvas.getBoundingClientRect();
-      const source = evt.touches ? evt.touches[0] : evt;
+      const source = evt.touches?.[0] ?? evt.changedTouches?.[0] ?? evt;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
       return {
-        x: source.clientX - rect.left,
-        y: source.clientY - rect.top
+        x: (source.clientX - rect.left) * scaleX,
+        y: (source.clientY - rect.top) * scaleY
       };
     }
 
-    function findPointAt(px, py) {
+    function findPointAt(px, py, hitRadiusPx) {
       for (let i = points.length - 1; i >= 0; i--) {
         const sp = toScreen(points[i]);
-        if (Math.hypot(px - sp.x, py - sp.y) <= pointHitRadiusPx) return i;
+        if (Math.hypot(px - sp.x, py - sp.y) <= hitRadiusPx) return i;
       }
       return -1;
     }
@@ -206,7 +209,8 @@
     function pointerDown(evt) {
       evt.preventDefault();
       const { x, y } = getPointerPos(evt);
-      dragIndex = findPointAt(x, y);
+      const hitRadiusPx = evt.touches ? touchPointHitRadiusPx : pointHitRadiusPx;
+      dragIndex = findPointAt(x, y, hitRadiusPx);
     }
 
     function pointerMove(evt) {
