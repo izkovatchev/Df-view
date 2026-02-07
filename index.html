@@ -188,9 +188,11 @@
     function getPointerPos(evt) {
       const rect = canvas.getBoundingClientRect();
       const source = evt.touches ? evt.touches[0] : evt;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
       return {
-        x: source.clientX - rect.left,
-        y: source.clientY - rect.top
+        x: (source.clientX - rect.left) * scaleX,
+        y: (source.clientY - rect.top) * scaleY
       };
     }
 
